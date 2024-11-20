@@ -10,6 +10,14 @@
         <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
+        <!-- Large central sphere for reference -->
+        <a-sphere position="0 0 0" 
+                  radius="2" 
+                  color="#FF4500"
+                  material="shader: flat; opacity: 0.8"
+                  class="clickable">
+        </a-sphere>
+
         <!-- Stars container -->
         <a-entity id="starfield"></a-entity>
         
@@ -32,7 +40,7 @@
         </a-entity>
     </a-scene>
 
-    <script>
+   <script>
         document.addEventListener('DOMContentLoaded', function() {
             const starfield = document.getElementById('starfield');
             
