@@ -22,62 +22,64 @@
     </a-scene>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const starfield = document.getElementById('starfield');
-            
-            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-                .then(response => response.json())
-                .then(data => {
-                    // Filter and sort stars
-                    const stars = data.features
-                        .filter(star => star.properties.mag < 5) // Only visible stars
-                        .sort((a, b) => a.properties.mag - b.properties.mag)
-                        .slice(0, 200); // Take top 200 brightest stars
+      document.addEventListener('DOMContentLoaded', function() {
+    const starfield = document.getElementById('starfield');
+    
+    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+        .then(response => response.json())
+        .then(data => {
+            const stars = data.features
+                .filter(star => star.properties.mag < 5)
+                .sort((a, b) => a.properties.mag - b.properties.mag)
+                .slice(0, 200);
 
-                    stars.forEach(star => {
-                        const [x, y, z] = star.geometry.coordinates;
-                        const magnitude = star.properties.mag;
-                        
-                        // Create star sphere
-                        const starEntity = document.createElement('a-sphere');
-                        
-                        // Scale size based on magnitude (brighter = bigger)
-                        const size = Math.max(0.02, 0.1 / magnitude);
-                        
-                        starEntity.setAttribute('position', `${x} ${y} ${z}`);
-                        starEntity.setAttribute('radius', size);
-                        starEntity.setAttribute('material', {
-                            shader: 'standard',
-                            color: '#3887be', // Blue color
-                            emissive: '#3887be',
-                            emissiveIntensity: 1,
-                            metalness: 0,
-                            roughness: 0.5
-                        });
-
-                        // Add name label
-                        if (star.properties.name) {
-                            const text = document.createElement('a-text');
-                            text.setAttribute('value', star.properties.name);
-                            text.setAttribute('align', 'center');
-                            text.setAttribute('position', `0 ${size + 0.1} 0`);
-                            text.setAttribute('scale', '0.5 0.5 0.5');
-                            text.setAttribute('visible', false);
-                            starEntity.appendChild(text);
-
-                            // Show/hide name on hover
-                            starEntity.addEventListener('mouseenter', () => {
-                                text.setAttribute('visible', true);
-                            });
-                            starEntity.addEventListener('mouseleave', () => {
-                                text.setAttribute('visible', false);
-                            });
-                        }
-
-                        starfield.appendChild(starEntity);
-                    });
+            stars.forEach(star => {
+                const [x, y, z] = star.geometry.coordinates;
+                const magnitude = star.properties.mag;
+                
+                const starEntity = document.createElement('a-sphere');
+                
+                // Double the size and position values
+                const size = Math.max(0.04, 0.2 / magnitude); // Doubled from 0.02 and 0.1
+                const scaledPosition = {
+                    x: x * 2, // Scale up positions
+                    y: y * 2,
+                    z: z * 2
+                };
+                
+                starEntity.setAttribute('position', `${scaledPosition.x} ${scaledPosition.y} ${scaledPosition.z}`);
+                starEntity.setAttribute('radius', size);
+                starEntity.setAttribute('material', {
+                    shader: 'standard', // Use standard shader to avoid compilation errors
+                    color: '#3887be',
+                    emissive: '#3887be',
+                    emissiveIntensity: 1,
+                    metalness: 0,
+                    roughness: 0.5
                 });
+
+                // Scale up text position as well
+                if (star.properties.name) {
+                    const text = document.createElement('a-text');
+                    text.setAttribute('value', star.properties.name);
+                    text.setAttribute('align', 'center');
+                    text.setAttribute('position', `0 ${size + 0.2} 0`); // Doubled offset
+                    text.setAttribute('scale', '1 1 1'); // Doubled scale
+                    text.setAttribute('visible', false);
+                    starEntity.appendChild(text);
+
+                    starEntity.addEventListener('mouseenter', () => {
+                        text.setAttribute('visible', true);
+                    });
+                    starEntity.addEventListener('mouseleave', () => {
+                        text.setAttribute('visible', false);
+                    });
+                }
+
+                starfield.appendChild(starEntity);
+            });
         });
+});
     </script>
 </body>
 </html>
