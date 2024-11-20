@@ -24,15 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 selectedStars = selectedStars.concat(additionalStars);
             }
 
-            starfield.setAttribute('sprite-particles', {
-                texture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
-                color: '#FFFFFF, #FFFF00, #87CEFA',
-                size: '0.01..0.03',
-                randomize: 'size, color',
-                opacity: '0.7..1',
-                blending: 'additive',
-                maxParticleCount: selectedStars.length
-            });
+     starfield.setAttribute('sprite-particles', {
+    texture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
+    color: '#FFFFFF',  // Simplify color initially
+    size: '0.02',     // Use single value first
+    opacity: '1',     // Start with full opacity
+    blending: 'additive',
+    maxParticleCount: selectedStars.length,
+    randomize: false  // Disable randomization initially
+});
 
             selectedStars.forEach(star => {
                 const entity = document.createElement('a-entity');
