@@ -1,18 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Orion Constellation Magnitude vs Color Hertzsprung-Russell</title>
+    <title>Star Visualization</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 </head>
 <body>
-    <a-scene renderer="precision: medium">
-        <a-entity light="type: ambient; color: #FFF; intensity: 0.2"></a-entity>
-        <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="-1 1 0"></a-entity>
+    <a-scene renderer="precision: medium"  bloom="radius: 0.75; strength: 0.5; threshold: 0.1">
+        <!-- Lighting -->
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
+        <!-- Reference sphere -->
+        <a-sphere position="0 0 -5" 
+                  radius="1" 
+                sphere.setAttribute('material', {
+    shader: 'flat',
+    color: starColor,
+    emissive: starColor,
+    emissiveIntensity: 1,
+    opacity: 0.9
+});
+        </a-sphere>
+
+        <!-- Stars container -->
         <a-entity id="starfield"></a-entity>
         
-        <a-sky color="#000000"></a-sky>
+        <!-- Skybox -->
+        <a-sky src="https://cdn.glitch.global/5cfc02c2-e08f-4e29-9383-05c3fa57335f/skybox_equirectangular.png?v=1732135394692"></a-sky>
         
+        <!-- Camera rig -->
         <a-entity position="0 1.6 0">
             <a-camera look-controls wasd-controls>
                 <a-cursor
@@ -30,61 +46,63 @@
     document.addEventListener('DOMContentLoaded', function() {
         const starfield = document.getElementById('starfield');
         
-        function getColorFromIndex(colorIndex) {
-            if (colorIndex < 0) return '#88CCFF';
-            if (colorIndex < 0.5) return '#FFFFFF';
-            if (colorIndex < 1.0) return '#FFFF00';
-            if (colorIndex < 1.5) return '#FF8000';
-            return '#FF0000';
+        // Define spectral class colors
+        const spectralColors = {
+            'O': '#FF0000', // Red
+            'B': '#FF7F00', // Orange
+            'A': '#FFFF00', // Yellow
+            'F': '#00FF00', // Green
+            'G': '#0000FF', // Blue
+            'K': '#4B0082', // Indigo
+            'M': '#9400D3'  // Violet
+        };
+
+        function getSpectralColor(spectralClass) {
+            return spectralColors[spectralClass[0]] || '#ffffff';
         }
 
         fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
             .then(response => response.json())
             .then(data => {
-                const stars = data.features.filter(star => 
-                    star.properties.mag !== undefined && star.properties['B-V'] !== undefined
-                );
-
-                const magMin = Math.min(...stars.map(s => s.properties.mag));
-                const magMax = Math.max(...stars.map(s => s.properties.mag));
-                const colorMin = Math.min(...stars.map(s => s.properties['B-V']));
-                const colorMax = Math.max(...stars.map(s => s.properties['B-V']));
+                const stars = data.features
+                    .filter(star => star.properties.mag < 5)
+                    .slice(0, 200);
 
                 stars.forEach(star => {
                     const sphere = document.createElement('a-sphere');
+                    // Handle 2D coordinates case
+                    const coords = star.geometry.coordinates;
+                    const x = coords[0];
+                    const y = coords[1];
+                    const z = coords.length > 2 ? coords[2] : 0;
                     
+                    // Adjust scale factor to keep stars in view
+                    const scaleFactor = 0.05;
+                    
+                    // Calculate luminosity based on star magnitude
                     const magnitude = star.properties.mag;
-                    const colorIndex = star.properties['B-V'];
-
-                    // Normalize positions to fit in our view
-                    const x = ((colorIndex - colorMin) / (colorMax - colorMin) * 10) - 5;
-                    const y = ((magnitude - magMin) / (magMax - magMin) * -10) + 5; // Invert Y axis
-                    const z = -5; // Fixed distance in front of the camera
-
-                    sphere.setAttribute('position', `${x} ${y} ${z}`);
+                    const maxSize = 1.0;  // Match the test sphere size
+                    const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
+                    const finalSize = maxSize * luminosityFactor;
                     
-                    // Calculate star size based on magnitude (brighter stars are larger)
-                    const starSize = Math.max(0.05, 0.2 - magnitude * 0.02);
-                    sphere.setAttribute('radius', starSize);
-                    
-                    const starColor = getColorFromIndex(colorIndex);
-                    
+                    // Set position and attributes
+                    sphere.setAttribute('position', 
+                        `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
+                    sphere.setAttribute('radius', finalSize);
+                    sphere.setAttribute('color', getSpectralColor(star.properties.spect || 'G'));
                     sphere.setAttribute('material', {
                         shader: 'flat',
-                        color: starColor,
-                        emissive: starColor,
-                        emissiveIntensity: 1,
-                        opacity: 0.9
+                        opacity: 0.8
                     });
-                    
                     sphere.setAttribute('class', 'clickable');
                     sphere.setAttribute('title', star.properties.name || 'Unnamed star');
 
+                    // Add hover event for displaying star name
                     sphere.addEventListener('mouseenter', function () {
-                        this.setAttribute('scale', '1.2 1.2 1.2');
+                        sphere.setAttribute('scale', '1.2 1.2 1.2');
                     });
                     sphere.addEventListener('mouseleave', function () {
-                        this.setAttribute('scale', '1 1 1');
+                        sphere.setAttribute('scale', '1 1 1');
                     });
                     
                     starfield.appendChild(sphere);
