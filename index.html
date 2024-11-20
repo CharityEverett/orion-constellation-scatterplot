@@ -73,11 +73,11 @@
                     const z = coords.length > 2 ? coords[2] : 0;
                     
                     // Adjust scale factor to keep stars in view
-                    const scaleFactor = 0.05;
+                    const scaleFactor = 0.2;
                     
                     // Calculate luminosity based on star magnitude
                     const magnitude = star.properties.mag;
-                    const maxSize = 1.0;  // Match the test sphere size
+                    const maxSize = 0.5;  // Match the test sphere size
                     const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
                     const finalSize = maxSize * luminosityFactor;
                     
@@ -89,6 +89,8 @@
                     sphere.setAttribute('material', {
                         shader: 'flat',
                         opacity: 0.8
+                        emissive: getSpectralColor(star.properties.spect || 'G'),
+                        emissiveIntensity: 0.7
                     });
                     sphere.setAttribute('class', 'clickable');
                     sphere.setAttribute('title', star.properties.name || 'Unnamed star');
