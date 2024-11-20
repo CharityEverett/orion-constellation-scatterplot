@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+``<!DOCTYPE html>
 <html>
 <head>
     <title>Star Visualization</title>
@@ -65,11 +65,12 @@
                     `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
                 
                 sphere.setAttribute('radius', '0.5');
-                sphere.setAttribute('color', '#FF4500');
+                sphere.setAttribute('color', '#ffffff');
                 sphere.setAttribute('material', {
-                    shader: 'flat',
-                    opacity: 0.8
-                });
+                shader: 'flat',
+                opacity: luminosityFactor,
+                emissive: '#ffffff',
+                emissiveIntensity: luminosityFactor                });
                 
                 starfield.appendChild(sphere);
             });
