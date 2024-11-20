@@ -77,7 +77,7 @@
                     
                     // Calculate luminosity based on star magnitude
                     const magnitude = star.properties.mag;
-                    const maxSize = 0.5;  // Match the test sphere size
+                    const maxSize = 1;  // Match the test sphere size
                     const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
                     const finalSize = maxSize * luminosityFactor;
                     
