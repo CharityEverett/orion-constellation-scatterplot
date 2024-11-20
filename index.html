@@ -38,55 +38,44 @@
     </a-scene>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const starfield = document.getElementById('starfield');
-            
-            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-                .then(response => response.json())
-                .then(data => {
-                    const stars = data.features
-                        .filter(star => star.properties.mag < 5)
-                        .slice(0, 200);
+       document.addEventListener('DOMContentLoaded', function() {
+    const starfield = document.getElementById('starfield');
+    
+    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+        .then(response => response.json())
+        .then(data => {
+            const stars = data.features
+                .filter(star => star.properties.mag < 5)
+                .slice(0, 200);
 
-                    stars.forEach(star => {
-                        const sphere = document.createElement('a-sphere');
-                        const [x, y, z] = star.geometry.coordinates;
-                        
-                        // Match reference sphere properties
-                        const scaleFactor = 0.2;
-                        sphere.setAttribute('position', {
-                            x: x * scaleFactor,
-                            y: y * scaleFactor,
-                            z: (z * scaleFactor) - 5
-                        });
-                        
-                        // Match reference sphere size and appearance
-                        sphere.setAttribute('radius', '1');
-                        sphere.setAttribute('color', '#FF4500');
-                        sphere.setAttribute('material', 'shader: flat; opacity: 0.8');
-                        sphere.setAttribute('class', 'clickable');
-                        
-                        starfield.appendChild(sphere);
-
-                        if (star.properties.name) {
-                            const text = document.createElement('a-text');
-                            text.setAttribute('value', star.properties.name);
-                            text.setAttribute('align', 'center');
-                            text.setAttribute('position', '0 1.5 0');
-                            text.setAttribute('scale', '0.5 0.5 0.5');
-                            text.setAttribute('visible', false);
-                            sphere.appendChild(text);
-
-                            sphere.addEventListener('mouseenter', () => {
-                                text.setAttribute('visible', true);
-                            });
-                            sphere.addEventListener('mouseleave', () => {
-                                text.setAttribute('visible', false);
-                            });
-                        }
-                    });
+            stars.forEach(star => {
+                const sphere = document.createElement('a-sphere');
+                // Handle 2D coordinates case
+                const coords = star.geometry.coordinates;
+                const x = coords[0];
+                const y = coords[1];
+                const z = coords.length > 2 ? coords[2] : 0;
+                
+                // Adjust scale factor to keep stars in view
+                const scaleFactor = 0.05; // Reduced from 0.2
+                
+                // Use string format for position
+                sphere.setAttribute('position', 
+                    `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
+                
+                sphere.setAttribute('radius', '0.5');
+                sphere.setAttribute('color', '#FF4500');
+                sphere.setAttribute('material', {
+                    shader: 'flat',
+                    opacity: 0.8
                 });
-        });
+                
+                starfield.appendChild(sphere);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+});
+                     
     </script>
 </body>
 </html>
