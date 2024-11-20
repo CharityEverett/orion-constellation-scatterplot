@@ -89,9 +89,7 @@
                     sphere.setAttribute('material', {
                         shader: 'flat',
                         opacity: 0.8
-                         emissive: getSpectralColor(star.properties.spect || 'G'),
-                        emissiveIntensity: 0.7
-                                    });
+                    });
                     sphere.setAttribute('class', 'clickable');
                     sphere.setAttribute('title', star.properties.name || 'Unnamed star');
 
