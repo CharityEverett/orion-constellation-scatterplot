@@ -5,7 +5,7 @@
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 </head>
 <body>
-    <a-scene renderer="precision: medium">
+    <a-scene renderer="precision: medium"  bloom="radius: 0.75; strength: 0.5; threshold: 0.1">
         <!-- Lighting -->
         <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
@@ -13,9 +13,13 @@
         <!-- Reference sphere -->
         <a-sphere position="0 0 -5" 
                   radius="1" 
-                  color="#FF4500"
-                  material="shader: flat; opacity: 0.8"
-                  class="clickable">
+                sphere.setAttribute('material', {
+    shader: 'flat',
+    color: starColor,
+    emissive: starColor,
+    emissiveIntensity: 1,
+    opacity: 0.9
+});
         </a-sphere>
 
         <!-- Stars container -->
