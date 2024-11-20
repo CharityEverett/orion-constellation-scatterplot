@@ -7,79 +7,81 @@
 <body>
     <a-scene renderer="precision: medium">
         <!-- Lighting -->
-        <a-entity light="type: ambient; color: #FFF; intensity: 0.5"></a-entity>
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
-        <!-- Stars will be added here by JavaScript -->
+        <!-- Stars container -->
         <a-entity id="starfield"></a-entity>
         
         <a-sky color="#000000"></a-sky>
         
-        <!-- Camera -->
-        <a-entity position="0 0 5">
-            <a-camera look-controls wasd-controls></a-camera>
+        <!-- Camera rig with cursor -->
+        <a-entity position="0 0 20">
+            <a-camera look-controls wasd-controls>
+                <a-cursor
+                    id="cursor"
+                    animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                    animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                    animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1; dur: 500"
+                    material="color: white; shader: flat"
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    raycaster="objects: .clickable">
+                </a-cursor>
+            </a-camera>
         </a-entity>
     </a-scene>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-    const starfield = document.getElementById('starfield');
-    
-    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-        .then(response => response.json())
-        .then(data => {
-            const stars = data.features
-                .filter(star => star.properties.mag < 5)
-                .sort((a, b) => a.properties.mag - b.properties.mag)
-                .slice(0, 200);
+        document.addEventListener('DOMContentLoaded', function() {
+            const starfield = document.getElementById('starfield');
+            
+            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    const stars = data.features
+                        .filter(star => star.properties.mag < 5)
+                        .slice(0, 200);
 
-            stars.forEach(star => {
-                const [x, y, z] = star.geometry.coordinates;
-                const magnitude = star.properties.mag;
-                
-                const starEntity = document.createElement('a-sphere');
-                
-                // Double the size and position values
-                const size = Math.max(0.04, 0.2 / magnitude); // Doubled from 0.02 and 0.1
-                const scaledPosition = {
-                    x: x * 2, // Scale up positions
-                    y: y * 2,
-                    z: z * 2
-                };
-                
-                starEntity.setAttribute('position', `${scaledPosition.x} ${scaledPosition.y} ${scaledPosition.z}`);
-                starEntity.setAttribute('radius', size);
-                starEntity.setAttribute('material', {
-                    shader: 'standard', // Use standard shader to avoid compilation errors
-                    color: '#3887be',
-                    emissive: '#3887be',
-                    emissiveIntensity: 1,
-                    metalness: 0,
-                    roughness: 0.5
+                    stars.forEach(star => {
+                        const sphere = document.createElement('a-sphere');
+                        const [x, y, z] = star.geometry.coordinates;
+                        const magnitude = star.properties.mag;
+                        
+                        const size = Math.max(0.1, 0.5 / magnitude);
+                        
+                        sphere.setAttribute('position', {
+                            x: x * 2,
+                            y: y * 2,
+                            z: z * 2
+                        });
+                        
+                        sphere.setAttribute('radius', size);
+                        sphere.setAttribute('color', '#3887be');
+                        sphere.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.8');
+                        sphere.setAttribute('class', 'clickable'); // Make stars clickable
+                        
+                        starfield.appendChild(sphere);
+
+                        if (star.properties.name) {
+                            const text = document.createElement('a-text');
+                            text.setAttribute('value', star.properties.name);
+                            text.setAttribute('align', 'center');
+                            text.setAttribute('position', `0 ${size + 0.2} 0`);
+                            text.setAttribute('scale', '1 1 1');
+                            text.setAttribute('visible', false);
+                            sphere.appendChild(text);
+
+                            sphere.addEventListener('mouseenter', () => {
+                                text.setAttribute('visible', true);
+                            });
+                            sphere.addEventListener('mouseleave', () => {
+                                text.setAttribute('visible', false);
+                            });
+                        }
+                    });
                 });
-
-                // Scale up text position as well
-                if (star.properties.name) {
-                    const text = document.createElement('a-text');
-                    text.setAttribute('value', star.properties.name);
-                    text.setAttribute('align', 'center');
-                    text.setAttribute('position', `0 ${size + 0.2} 0`); // Doubled offset
-                    text.setAttribute('scale', '1 1 1'); // Doubled scale
-                    text.setAttribute('visible', false);
-                    starEntity.appendChild(text);
-
-                    starEntity.addEventListener('mouseenter', () => {
-                        text.setAttribute('visible', true);
-                    });
-                    starEntity.addEventListener('mouseleave', () => {
-                        text.setAttribute('visible', false);
-                    });
-                }
-
-                starfield.appendChild(starEntity);
-            });
         });
-});
     </script>
 </body>
 </html>
