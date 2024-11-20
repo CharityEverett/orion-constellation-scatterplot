@@ -39,7 +39,7 @@
     </a-scene>
 
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
     const starfield = document.getElementById('starfield');
     
     fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
@@ -58,37 +58,27 @@
                 const z = coords.length > 2 ? coords[2] : 0;
                 
                 // Adjust scale factor to keep stars in view
-                const scaleFactor = 0.05; // Reduced from 0.2
+                const scaleFactor = 0.05;
                 
-                // Use string format for position
+                // Calculate luminosity based on star magnitude
+                const magnitude = star.properties.mag;
+                const maxSize = 1.0;  // Match the test sphere size
+                const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
+                const finalSize = maxSize * luminosityFactor;
+                
+                // Set position and attributes
                 sphere.setAttribute('position', 
                     `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
-
-                // Calculate luminosity based on star magnitude
-             stars.forEach(star => {
-    const sphere = document.createElement('a-sphere');
-    const magnitude = star.properties.mag;
-    
-    // Use magnitude range to scale stars
-    // Brightest stars (lowest magnitude) should be size 1.0 (matching test sphere)
-    const maxSize = 1.0;  // Match the test sphere size
-    const minSize = 0.1;  // Smallest star size
-    
-    // Calculate size based on magnitude (lower magnitude = brighter = bigger)
-    const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
-    const finalSize = maxSize * luminosityFactor;
-    
-    sphere.setAttribute('radius', finalSize);
-    sphere.setAttribute('color', '#FF4500');  // Match test sphere color
-    sphere.setAttribute('material', {
-        shader: 'flat',
-        opacity: 0.8
-    });
-    
-    starfield.appendChild(sphere);
-});
-    })
-})
+                sphere.setAttribute('radius', finalSize);
+                sphere.setAttribute('color', '#FF4500');
+                sphere.setAttribute('material', {
+                    shader: 'flat',
+                    opacity: 0.8
+                });
+                
+                starfield.appendChild(sphere);
+            });
+        })
         .catch(error => console.error('Error:', error));
 });
                      
