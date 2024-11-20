@@ -65,18 +65,28 @@
                     `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
 
                 // Calculate luminosity based on star magnitude
-                const magnitude = star.properties.mag;
-// Keep base size at 0.5 but adjust it with magnitude
-const baseSize = 0.5;
-const luminosityFactor = Math.max(0.2, (6 - magnitude) / 6);
-const finalSize = baseSize * luminosityFactor;
-
-sphere.setAttribute('radius', finalSize);
-sphere.setAttribute('color', '#ffffff');
-sphere.setAttribute('material', {
-    shader: 'flat',
-    opacity: luminosityFactor
-        });
+             stars.forEach(star => {
+    const sphere = document.createElement('a-sphere');
+    const magnitude = star.properties.mag;
+    
+    // Use magnitude range to scale stars
+    // Brightest stars (lowest magnitude) should be size 1.0 (matching test sphere)
+    const maxSize = 1.0;  // Match the test sphere size
+    const minSize = 0.1;  // Smallest star size
+    
+    // Calculate size based on magnitude (lower magnitude = brighter = bigger)
+    const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
+    const finalSize = maxSize * luminosityFactor;
+    
+    sphere.setAttribute('radius', finalSize);
+    sphere.setAttribute('color', '#FF4500');  // Match test sphere color
+    sphere.setAttribute('material', {
+        shader: 'flat',
+        opacity: 0.8
+    });
+    
+    starfield.appendChild(sphere);
+});
     })
 })
         .catch(error => console.error('Error:', error));
