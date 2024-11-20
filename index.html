@@ -65,19 +65,20 @@
                     `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
 
                 // Calculate luminosity based on star magnitude
-                const luminosityFactor = Math.max(0.2, (6 - magnitude) / 6);
-                
-                sphere.setAttribute('radius', '0.5');
-                sphere.setAttribute('color', '#ffffff');
-                sphere.setAttribute('material', {
-                shader: 'flat',
-                opacity: luminosityFactor,
-                emissive: '#ffffff',
-                emissiveIntensity: luminosityFactor                });
-                
-                starfield.appendChild(sphere);
-            });
-        })
+                const magnitude = star.properties.mag;
+// Keep base size at 0.5 but adjust it with magnitude
+const baseSize = 0.5;
+const luminosityFactor = Math.max(0.2, (6 - magnitude) / 6);
+const finalSize = baseSize * luminosityFactor;
+
+sphere.setAttribute('radius', finalSize);
+sphere.setAttribute('color', '#ffffff');
+sphere.setAttribute('material', {
+    shader: 'flat',
+    opacity: luminosityFactor
+        });
+    })
+})
         .catch(error => console.error('Error:', error));
 });
                      
