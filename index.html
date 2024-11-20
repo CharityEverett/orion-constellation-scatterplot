@@ -10,9 +10,9 @@
         <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
-        <!-- Large central sphere for reference -->
-        <a-sphere position="0 0 0" 
-                  radius="2" 
+        <!-- Reference sphere -->
+        <a-sphere position="0 0 -5" 
+                  radius="1" 
                   color="#FF4500"
                   material="shader: flat; opacity: 0.8"
                   class="clickable">
@@ -23,14 +23,11 @@
         
         <a-sky color="#000000"></a-sky>
         
-        <!-- Camera rig with cursor -->
-        <a-entity position="0 0 20">
+        <!-- Camera rig -->
+        <a-entity position="0 1.6 0">
             <a-camera look-controls wasd-controls>
                 <a-cursor
                     id="cursor"
-                    animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                    animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-                    animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1; dur: 500"
                     material="color: white; shader: flat"
                     position="0 0 -1"
                     geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
@@ -40,7 +37,7 @@
         </a-entity>
     </a-scene>
 
-   <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             const starfield = document.getElementById('starfield');
             
@@ -54,20 +51,20 @@
                     stars.forEach(star => {
                         const sphere = document.createElement('a-sphere');
                         const [x, y, z] = star.geometry.coordinates;
-                        const magnitude = star.properties.mag;
                         
-                        const size = Math.max(0.1, 0.5 / magnitude);
-                        
+                        // Match reference sphere properties
+                        const scaleFactor = 0.2;
                         sphere.setAttribute('position', {
-                            x: x * 2,
-                            y: y * 2,
-                            z: z * 2
+                            x: x * scaleFactor,
+                            y: y * scaleFactor,
+                            z: (z * scaleFactor) - 5
                         });
                         
-                        sphere.setAttribute('radius', size);
-                        sphere.setAttribute('color', '#3887be');
-                        sphere.setAttribute('material', 'shader: flat; transparent: true; opacity: 0.8');
-                        sphere.setAttribute('class', 'clickable'); // Make stars clickable
+                        // Match reference sphere size and appearance
+                        sphere.setAttribute('radius', '1');
+                        sphere.setAttribute('color', '#FF4500');
+                        sphere.setAttribute('material', 'shader: flat; opacity: 0.8');
+                        sphere.setAttribute('class', 'clickable');
                         
                         starfield.appendChild(sphere);
 
@@ -75,8 +72,8 @@
                             const text = document.createElement('a-text');
                             text.setAttribute('value', star.properties.name);
                             text.setAttribute('align', 'center');
-                            text.setAttribute('position', `0 ${size + 0.2} 0`);
-                            text.setAttribute('scale', '1 1 1');
+                            text.setAttribute('position', '0 1.5 0');
+                            text.setAttribute('scale', '0.5 0.5 0.5');
                             text.setAttribute('visible', false);
                             sphere.appendChild(text);
 
