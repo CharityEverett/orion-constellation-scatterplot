@@ -63,6 +63,9 @@
                 // Use string format for position
                 sphere.setAttribute('position', 
                     `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
+
+                // Calculate luminosity based on star magnitude
+                const luminosityFactor = Math.max(0.2, (6 - magnitude) / 6);
                 
                 sphere.setAttribute('radius', '0.5');
                 sphere.setAttribute('color', '#ffffff');
