@@ -1,126 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Celestial Scatter Plot</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <title>Star Visualization</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 </head>
 <body>
     <a-scene renderer="precision: medium">
-           <a-entity id="starfield"></a-entity>
-    <a-sky color="#000000"></a-sky>
-        <!-- Test primitives in clear view of camera -->
-        <a-sphere position="0 1.25 -5" 
-                  radius="1.25" 
-                  color="#EF2D5E"
-                  material="shader: standard"></a-sphere>
+        <!-- Lighting -->
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.5"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
-        <a-cone position="-2 1 -5" 
-                radius-bottom="1" 
-                radius-top="0"
-                height="2" 
-                color="#FFC65D"
-                material="shader: standard"></a-cone>
-
-        <a-plane position="0 0 -4" 
-                 rotation="-90 0 0" 
-                 width="4" 
-                 height="4" 
-                 color="#7BC8A4"
-                 material="shader: standard"></a-plane>
-    <!-- Add ambient light -->
-    <a-entity light="type: ambient; color: #BBB; intensity: 0.5"></a-entity>
-    <!-- Add directional light -->
-    <a-entity light="type: directional; color: #FFF; intensity: 1" position="-0.5 1 1"></a-entity>
-    <a-camera position="0 1.6 5"></a-camera>
-</a-scene>
+        <!-- Stars will be added here by JavaScript -->
+        <a-entity id="starfield"></a-entity>
+        
         <a-sky color="#000000"></a-sky>
-        <a-entity position="0 1.6 5">
- <!-- Camera Rig -->
-    <a-entity id="rig" 
-          movement-controls="speed: 0.1; constrainToNavMesh: true;" 
-          position="0 0 -9"
-          responsive="controller: .controller;
-                      _default:[{'attr':'position', 'value':'0 0 -9'}];
-                      mobile:[{'attr':'position', 'value':'0 0 -7'}];"
-          class="collidable">
-  <a-entity camera 
-            position="0 1.6 0" 
-            look-controls 
-            wasd-controls="acceleration: 65"
-            responsive="controller: .controller;
-                        _default:[{'attr':'position', 'value':'0 1.6 0'}];
-                        mobile:[{'attr':'position', 'value':'0 1.3 0'}];"
-            class="collidable">
-    <a-cursor
-    raycaster="objects: .clickable, .collidable"
-    fuse="true"
-    fuseTimeout="500"
-    animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-    animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-    event-set__mouseenter="color: springgreen"
-    event-set__mouseleave="color: black"
-    position="0 0 -1"
-    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-    material="color: black; shader: flat">
-  </a-cursor>        </a-entity>
+        
+        <!-- Camera -->
+        <a-entity position="0 0 5">
+            <a-camera look-controls wasd-controls></a-camera>
+        </a-entity>
     </a-scene>
 
     <script>
-        // Register a simple star component
-        AFRAME.registerComponent('twinkling-star', {
-            schema: {
-                name: {type: 'string', default: ''},
-                magnitude: {type: 'number', default: 1.0}
-            },
-
-            init: function() {
-                // Create the star sphere
-                const size = Math.max(0.01, 0.05 / this.data.magnitude);
-                this.el.setAttribute('geometry', {
-                    primitive: 'sphere',
-                    radius: size
-                });
-                
-                this.el.setAttribute('material', {
-                    color: '#FFFFFF',
-                    emissive: '#FFFFFF',
-                    emissiveIntensity: 1,
-                    transparent: true,
-                    opacity: 0.8
-                });
-
-                // Create text label
-                const text = document.createElement('a-text');
-                text.setAttribute('value', this.data.name);
-                text.setAttribute('align', 'center');
-                text.setAttribute('position', '0 ' + (size + 0.1) + ' 0');
-                text.setAttribute('scale', '0.5 0.5 0.5');
-                text.setAttribute('visible', false);
-                this.el.appendChild(text);
-
-                // Add interactivity
-                this.el.addEventListener('mouseenter', () => {
-                    text.setAttribute('visible', true);
-                });
-                this.el.addEventListener('mouseleave', () => {
-                    text.setAttribute('visible', false);
-                });
-
-                // Setup twinkling
-                this.twinkleTime = Math.random() * 1000;
-            },
-
-            tick: function(time) {
-                // Simple twinkling effect
-                if (time - this.twinkleTime > 1000) {
-                    const opacity = 0.5 + Math.random() * 0.5;
-                    this.el.setAttribute('material', 'opacity', opacity);
-                    this.twinkleTime = time;
-                }
-            }
-        });
-
-        // Load and create stars
         document.addEventListener('DOMContentLoaded', function() {
             const starfield = document.getElementById('starfield');
             
@@ -129,18 +30,49 @@
                 .then(data => {
                     // Filter and sort stars
                     const stars = data.features
+                        .filter(star => star.properties.mag < 5) // Only visible stars
                         .sort((a, b) => a.properties.mag - b.properties.mag)
-                        .slice(0, 200);
+                        .slice(0, 200); // Take top 200 brightest stars
 
                     stars.forEach(star => {
                         const [x, y, z] = star.geometry.coordinates;
-                        const starEntity = document.createElement('a-entity');
+                        const magnitude = star.properties.mag;
+                        
+                        // Create star sphere
+                        const starEntity = document.createElement('a-sphere');
+                        
+                        // Scale size based on magnitude (brighter = bigger)
+                        const size = Math.max(0.02, 0.1 / magnitude);
                         
                         starEntity.setAttribute('position', `${x} ${y} ${z}`);
-                        starEntity.setAttribute('twinkling-star', {
-                            name: star.properties.name || 'Unnamed Star',
-                            magnitude: star.properties.mag
+                        starEntity.setAttribute('radius', size);
+                        starEntity.setAttribute('material', {
+                            shader: 'standard',
+                            color: '#3887be', // Blue color
+                            emissive: '#3887be',
+                            emissiveIntensity: 1,
+                            metalness: 0,
+                            roughness: 0.5
                         });
+
+                        // Add name label
+                        if (star.properties.name) {
+                            const text = document.createElement('a-text');
+                            text.setAttribute('value', star.properties.name);
+                            text.setAttribute('align', 'center');
+                            text.setAttribute('position', `0 ${size + 0.1} 0`);
+                            text.setAttribute('scale', '0.5 0.5 0.5');
+                            text.setAttribute('visible', false);
+                            starEntity.appendChild(text);
+
+                            // Show/hide name on hover
+                            starEntity.addEventListener('mouseenter', () => {
+                                text.setAttribute('visible', true);
+                            });
+                            starEntity.addEventListener('mouseleave', () => {
+                                text.setAttribute('visible', false);
+                            });
+                        }
 
                         starfield.appendChild(starEntity);
                     });
