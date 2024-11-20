@@ -8,6 +8,25 @@
     <a-scene renderer="precision: medium">
            <a-entity id="starfield"></a-entity>
     <a-sky color="#000000"></a-sky>
+        <!-- Test primitives in clear view of camera -->
+        <a-sphere position="0 1.25 -5" 
+                  radius="1.25" 
+                  color="#EF2D5E"
+                  material="shader: standard"></a-sphere>
+
+        <a-cone position="-2 1 -5" 
+                radius-bottom="1" 
+                radius-top="0"
+                height="2" 
+                color="#FFC65D"
+                material="shader: standard"></a-cone>
+
+        <a-plane position="0 0 -4" 
+                 rotation="-90 0 0" 
+                 width="4" 
+                 height="4" 
+                 color="#7BC8A4"
+                 material="shader: standard"></a-plane>
     <!-- Add ambient light -->
     <a-entity light="type: ambient; color: #BBB; intensity: 0.5"></a-entity>
     <!-- Add directional light -->
