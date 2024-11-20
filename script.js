@@ -1,47 +1,62 @@
-const orionStars = [
-    {name: "Rigel", mag: 0.13, x: -1, y: -1, z: 0},
-    {name: "Betelgeuse", mag: 0.5, x: 1, y: 1, z: 0},
-    {name: "Bellatrix", mag: 1.64, x: -0.5, y: 0.5, z: 0},
-    {name: "Alnilam", mag: 1.7, x: 0, y: 0, z: 0},
-    {name: "Alnitak", mag: 1.77, x: 0.5, y: 0, z: 0},
-    {name: "Saiph", mag: 2.06, x: -0.5, y: -1, z: 0},
-    // Add more stars from the Orion constellation...
-];
-
 document.addEventListener('DOMContentLoaded', function() {
     const starfield = document.getElementById('starfield');
-    
-    starfield.setAttribute('sprite-particles', {
-        texture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
-        color: '#FFFFFF, #FFFF00, #87CEFA',
-        size: '0.01..0.03',
-        randomize: 'size, color',
-        opacity: '0.7..1',
-        blending: 'additive',
-        maxParticleCount: orionStars.length
-    });
 
-    orionStars.forEach(star => {
-        const entity = document.createElement('a-entity');
-        entity.setAttribute('position', `${star.x} ${star.y} ${star.z}`);
-        entity.setAttribute('text', `value: ${star.name}; align: center; width: 2; color: white;`);
-        entity.setAttribute('visible', false);
-        
-        entity.addEventListener('mouseenter', function() {
-            this.setAttribute('visible', true);
+    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+        .then(response => response.json())
+        .then(data => {
+            let stars = data.features;
+            
+            // Sort by magnitude (brightness)
+            stars.sort((a, b) => a.properties.mag - b.properties.mag);
+            
+            // Select top 200 stars
+            let selectedStars = stars.slice(0, 200);
+            
+            // Optionally, filter for named stars
+            selectedStars = selectedStars.filter(star => star.properties.name);
+            
+            // If we need exactly 100-200 stars, we can adjust here
+            if (selectedStars.length > 200) {
+                selectedStars = selectedStars.slice(0, 200);
+            } else if (selectedStars.length < 100) {
+                // If we have fewer than 100 named stars, add more from the original sorted list
+                const additionalStars = stars.slice(selectedStars.length, 100);
+                selectedStars = selectedStars.concat(additionalStars);
+            }
+
+            starfield.setAttribute('sprite-particles', {
+                texture: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
+                color: '#FFFFFF, #FFFF00, #87CEFA',
+                size: '0.01..0.03',
+                randomize: 'size, color',
+                opacity: '0.7..1',
+                blending: 'additive',
+                maxParticleCount: selectedStars.length
+            });
+
+            selectedStars.forEach(star => {
+                const entity = document.createElement('a-entity');
+                const [x, y, z] = star.geometry.coordinates;
+                entity.setAttribute('position', `${x} ${y} ${z}`);
+                entity.setAttribute('text', `value: ${star.properties.name || 'Unnamed Star'}; align: center; width: 2; color: white;`);
+                entity.setAttribute('visible', false);
+                
+                entity.addEventListener('mouseenter', function() {
+                    this.setAttribute('visible', true);
+                });
+                entity.addEventListener('mouseleave', function() {
+                    this.setAttribute('visible', false);
+                });
+
+                starfield.appendChild(entity);
+            });
+
+            function twinkle() {
+                const currentOpacity = starfield.getAttribute('sprite-particles').opacity;
+                const newOpacity = currentOpacity === '0.7..1' ? '0.3..0.7' : '0.7..1';
+                starfield.setAttribute('sprite-particles', 'opacity', newOpacity);
+            }
+
+            setInterval(twinkle, 1000);
         });
-        entity.addEventListener('mouseleave', function() {
-            this.setAttribute('visible', false);
-        });
-
-        starfield.appendChild(entity);
-    });
-
-    function twinkle() {
-        const currentOpacity = starfield.getAttribute('sprite-particles').opacity;
-        const newOpacity = currentOpacity === '0.7..1' ? '0.3..0.7' : '0.7..1';
-        starfield.setAttribute('sprite-particles', 'opacity', newOpacity);
-    }
-
-    setInterval(twinkle, 1000);
 });
