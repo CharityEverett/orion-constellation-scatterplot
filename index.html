@@ -144,7 +144,7 @@ const colorIndices = [
                     .filter(star => star.properties.mag < 5)
                     .slice(0, 200);
 
-                stars.forEach(star => {
+                    coordinates.forEach((coord, index) => {
                     const sphere = document.createElement('a-sphere');
                     // Handle 2D coordinates case
                     const coords = star.geometry.coordinates;
