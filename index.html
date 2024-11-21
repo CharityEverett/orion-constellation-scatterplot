@@ -161,13 +161,7 @@ const colorIndices = [
                     const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
                     const finalSize = maxSize * luminosityFactor;
 
-                    // Set material based on B-V index 
-        sphere.setAttribute('material', { 
-            shader: 'flat', 
-            color: getColorFromIndex(colorIndices[index]), 
-            opacity: 0.8 
-        });
-        
+                 
                     // Set position and attributes
                     sphere.setAttribute('position', 
                         `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
@@ -187,7 +181,12 @@ const colorIndices = [
                     sphere.addEventListener('mouseleave', function () {
                         sphere.setAttribute('scale', '1 1 1');
                     });
-                    
+        // Set material based on B-V index 
+        sphere.setAttribute('material', { 
+            shader: 'flat', 
+            color: getColorFromIndex(colorIndices[index]), 
+            opacity: 0.8 
+        });
                     starfield.appendChild(sphere);
                 });
             })
