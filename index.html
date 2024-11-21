@@ -60,6 +60,40 @@
         function getSpectralColor(spectralClass) {
             return spectralColors[spectralClass[0]] || '#ffffff';
         }
+
+         // Array of B-V color index values 
+const colorIndices = [
+    -0.03,
+    0.15,
+    0.00,
+    0.06,
+    0.48,
+    1.54,
+    1.15,
+    0.16,
+    1.02,
+    0.09,
+    0.22,
+    0.00,
+    -0.01,
+    0.90,
+    1.05,
+    1.52,
+    0.13,
+    1.23,
+    0.19,
+    1.43
+];
+
+         // Function to get color from B-V index
+    function getColorFromIndex(bvIndex) {
+        if (bvIndex < 0) return '#88CCFF'; // Blue for very hot stars
+        if (bvIndex < 0.5) return '#FFFFFF'; // White for hot stars
+        if (bvIndex < 1.0) return '#FFFF00'; // Yellow for medium stars
+        if (bvIndex < 1.5) return '#FF8000'; // Orange for cool stars
+        return '#FF0000'; // Red for very cool stars
+    }
+
   // List of coordinates for H-R diagram
     const coordinates = [
     [-1.379, -6.720],
@@ -102,30 +136,7 @@
     [9.487179487179485, 9.487179487179487],
     [10.0, 10.0]
 ];
-        // Array of B-V color index values 
-const colorIndices = [
-    -0.03,
-    0.15,
-    0.00,
-    0.06,
-    0.48,
-    1.54,
-    1.15,
-    0.16,
-    1.02,
-    0.09,
-    0.22,
-    0.00,
-    -0.01,
-    0.90,
-    1.05,
-    1.52,
-    0.13,
-    1.23,
-    0.19,
-    1.43
-];
-
+       
         fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
             .then(response => response.json())
             .then(data => {
