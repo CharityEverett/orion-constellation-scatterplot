@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Orion Cluster Hertzsprung-Russell Scatterplot </title>
+    <title>Orion Cluster Hertzsprung-Russell Scatterplot</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
 </head>
 <body>
-    <a-scene renderer="precision: medium"  bloom="radius: 0.75; strength: 0.5; threshold: 0.1">
+    <a-scene renderer="precision: medium" bloom="radius: 0.75; strength: 0.5; threshold: 0.1">
         <!-- Lighting -->
         <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
@@ -13,13 +13,9 @@
         <!-- Reference sphere -->
         <a-sphere position="0 0 -5" 
                   radius="1" 
-                sphere.setAttribute('material', {
-    shader: 'flat',
-    color: starColor,
-    emissive: starColor,
-    emissiveIntensity: 1,
-    opacity: 0.9
-});
+                  color="#FF4500"
+                  material="shader: flat; opacity: 0.8"
+                  class="clickable">
         </a-sphere>
 
         <!-- Stars container -->
@@ -42,7 +38,7 @@
         </a-entity>
     </a-scene>
 
-   <script>
+    <script>
 document.addEventListener('DOMContentLoaded', function() {
     const starfield = document.getElementById('starfield');
     
@@ -52,6 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (colorIndex < 1.0) return '#FFFF00';
         if (colorIndex < 1.5) return '#FF8000';
         return '#FF0000';
+    }
+
+    function getStarSize(magnitude) {
+        const maxSize = 1.0;  // Original maximum size
+        const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
+        return maxSize * luminosityFactor;
     }
 
     fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
@@ -66,23 +68,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const colorMin = Math.min(...stars.map(s => s.properties['B-V']));
             const colorMax = Math.max(...stars.map(s => s.properties['B-V']));
 
-            // Scale factor to ensure visibility
-            const scaleFactor = 10.0;
-
             stars.forEach(star => {
                 const sphere = document.createElement('a-sphere');
                 
                 const magnitude = star.properties.mag;
                 const colorIndex = star.properties['B-V'];
 
-                // Normalize positions and apply scale factor
-                const x = (((colorIndex - colorMin) / (colorMax - colorMin) * 2) - 1) * scaleFactor;
-                const y = (((magnitude - magMin) / (magMax - magMin) * -2) + 1) * scaleFactor;
+                // Normalize positions to fit in our view
+                const x = ((colorIndex - colorMin) / (colorMax - colorMin) * 20) - 10;
+                const y = ((magnitude - magMin) / (magMax - magMin) * -20) + 10; // Invert Y axis
                 const z = -5; // Fixed distance in front of the camera
 
                 sphere.setAttribute('position', `${x} ${y} ${z}`);
                 
-                sphere.setAttribute('radius', 0.1); // Set a constant radius for visibility
+                sphere.setAttribute('radius', getStarSize(magnitude));
                 
                 const starColor = getColorFromIndex(colorIndex);
                 
