@@ -147,7 +147,6 @@ const colorIndices = [
                     coordinates.forEach((coord, index) => {
                     const sphere = document.createElement('a-sphere');
                     // Handle 2D coordinates case
-                    const coords = star.geometry.coordinates;
                     const x = coords[0];
                     const y = coords[1];
                     const z = coords.length > 2 ? coords[2] : 0;
@@ -155,43 +154,40 @@ const colorIndices = [
         // Set position using template literals
         sphere.setAttribute('position', `${x} ${y} ${z}`);
                         
-                    // Adjust scale factor to keep stars in view
-                    const scaleFactor = 0.05;
-                    
-                    // Calculate luminosity based on star magnitude
-                    const magnitude = star.properties.mag;
-                    const maxSize = 1.0;  // Match the test sphere size
-                    const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
-                    const finalSize = maxSize * luminosityFactor;
+                   coordinates.forEach((coord, index) => {
+    const sphere = document.createElement('a-sphere');
+    
+    const scaleFactor = 0.05; // Reintroduce the scale factor
+    const x = coord[0] * scaleFactor;
+    const y = coord[1] * scaleFactor;
+    const z = -5; // Maintain the fixed distance from the camera
 
-                 
-                    // Set position and attributes
-                    sphere.setAttribute('position', 
-                        `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
-                    sphere.setAttribute('radius', finalSize);
-                    sphere.setAttribute('color', getSpectralColor(star.properties.spect || 'G'));
-                    sphere.setAttribute('material', {
-                        shader: 'flat',
-                        opacity: 0.8
-                    });
-                    sphere.setAttribute('class', 'clickable');
-                    sphere.setAttribute('title', star.properties.name || 'Unnamed star');
+    // Set position using template literals
+    sphere.setAttribute('position', `${x} ${y} ${z}`);
+    
+    // Set material based on B-V index
+    sphere.setAttribute('material', { 
+        shader: 'flat', 
+        color: getColorFromIndex(colorIndices[index]), 
+        opacity: 0.8 
+    });
 
-                    // Add hover event for displaying star name
-                    sphere.addEventListener('mouseenter', function () {
-                        sphere.setAttribute('scale', '1.2 1.2 1.2');
-                    });
-                    sphere.addEventListener('mouseleave', function () {
-                        sphere.setAttribute('scale', '1 1 1');
-                    });
-        // Set material based on B-V index 
-        sphere.setAttribute('material', { 
-            shader: 'flat', 
-            color: getColorFromIndex(colorIndices[index]), 
-            opacity: 0.8 
-        });
-                    starfield.appendChild(sphere);
-                });
+    // Set a constant size for all stars, or vary it if needed
+    sphere.setAttribute('radius', 0.1); // Adjust this value as needed
+
+    sphere.setAttribute('class', 'clickable');
+    sphere.setAttribute('title', 'Star ' + (index + 1));
+
+    // Add hover events
+    sphere.addEventListener('mouseenter', function () {
+        this.setAttribute('scale', '1.2 1.2 1.2');
+    });
+    sphere.addEventListener('mouseleave', function () {
+        this.setAttribute('scale', '1 1 1');
+    });
+    
+    starfield.appendChild(sphere);
+});
             })
             .catch(error => console.error('Error:', error));
     });
