@@ -60,7 +60,29 @@
         function getSpectralColor(spectralClass) {
             return spectralColors[spectralClass[0]] || '#ffffff';
         }
-
+  // List of coordinates for H-R diagram
+    const coordinates = [
+       1. (-1.379, -6.720)
+2. (0.748, -5.618)
+3. (-8.719, -6.102)
+4. (0.680, -7.285)
+5. (-2.649, -6.263)
+6. (-8.669, 0.565)
+7. (-6.310, 0.000)
+8. (-2.739, -4.301)
+9. (-5.707, -7.016)
+10. (-9.526, -1.478)
+11. (0.415, -6.747)
+12. (0.798, -5.806)
+13. (-8.121, -6.263)
+14. (-8.150, -5.995)
+15. (-1.605, -3.441)
+16. (-5.205, -5.242)
+17. (-4.968, -1.452)
+18. (-7.467, -4.435)
+19. (-2.344, -0.323)
+20. (0.764, -6.935)
+    ];
         fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
             .then(response => response.json())
             .then(data => {
