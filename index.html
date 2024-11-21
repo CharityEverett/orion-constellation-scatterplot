@@ -160,7 +160,14 @@ const colorIndices = [
                     const maxSize = 1.0;  // Match the test sphere size
                     const luminosityFactor = Math.max(0.1, (6 - magnitude) / 6);
                     const finalSize = maxSize * luminosityFactor;
-                    
+
+                    // Set material based on B-V index 
+        sphere.setAttribute('material', { 
+            shader: 'flat', 
+            color: getColorFromIndex(colorIndices[index]), 
+            opacity: 0.8 
+        });
+        
                     // Set position and attributes
                     sphere.setAttribute('position', 
                         `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
