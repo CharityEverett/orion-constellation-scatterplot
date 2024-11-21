@@ -154,9 +154,7 @@ const colorIndices = [
         // Set position using template literals
         sphere.setAttribute('position', `${x} ${y} ${z}`);
                         
-                   coordinates.forEach((coord, index) => {
-    const sphere = document.createElement('a-sphere');
-    
+               
     const scaleFactor = 0.05; // Reintroduce the scale factor
     const x = coord[0] * scaleFactor;
     const y = coord[1] * scaleFactor;
