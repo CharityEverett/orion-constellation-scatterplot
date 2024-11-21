@@ -76,7 +76,7 @@
                     // Normalize positions for H-R plot
                     const x = ((colorIndex - colorMin) / (colorMax - colorMin) * 10) - 5;                    
                     const y = ((magnitude - magMin) / (magMax - magMin) * -10) + 5; // Invert Y axis                    const scaleFactor = 0.05;
-                    const z = -5; // Fixed distance in front of the camera
+                    const z = 0.05; // Fixed distance in front of the camera
                     
                     // Calculate luminosity based on star magnitude
                     const magnitude = star.properties.mag;
