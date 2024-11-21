@@ -151,7 +151,10 @@ const colorIndices = [
                     const x = coords[0];
                     const y = coords[1];
                     const z = coords.length > 2 ? coords[2] : 0;
-                    
+
+        // Set position using template literals
+        sphere.setAttribute('position', `${x} ${y} ${z}`);
+                        
                     // Adjust scale factor to keep stars in view
                     const scaleFactor = 0.05;
                     
