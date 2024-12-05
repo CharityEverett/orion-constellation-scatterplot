@@ -4,9 +4,13 @@
     <title>Orion Star Cluster Hertsprung-Russell Scatterplot</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 </head>
 <body>
    <a-scene renderer="precision: medium">
+    <!-- Canvas Plot -->
+    <canvas id="hrDiagram" width="800" height="600"></canvas>
+       
     <!-- Lighting -->
     <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
@@ -50,6 +54,8 @@
         .then(response => response.json())
         .then(data => {
             const stars = data.features
+
+                
                 .filter(star => star.properties.mag < 5)
                 .slice(0, 200);
 
