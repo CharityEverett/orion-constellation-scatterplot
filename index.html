@@ -95,26 +95,30 @@ function calculateRadius(luminosity, temperature) {
     return radiusMeters / solarRadius;
 }
 
+const temperatures = [];
+const luminosities = [];
+const radii = [];
+
 stars.forEach(star => {
     const mag = star.properties.mag;
     const bv = star.properties.bv;
 
-    if (bv !== undefined && bv !== null) {
+    if (bv !== undefined && bv !== null && mag !== undefined && mag !== null) {
         // Calculate temperature from B-V color index
         const temperature = 4600 * ((1 / (0.92 * bv + 1.7)) + (1 / (0.92 * bv + 0.62)));
+
+        // Calculate luminosity from apparent magnitude
+        const distance = 10; // Placeholder distance in parsecs
+        const absoluteMagnitude = mag - 5 * (Math.log10(distance) - 1);
+        const luminosity = Math.pow(10, (4.83 - absoluteMagnitude) / 2.5);
+
+        // Calculate radius using Stefan-Boltzmann law
+        const radius = calculateRadius(luminosity, temperature);
+
+        // Push calculated values to arrays
         temperatures.push(temperature);
-
-        if (mag !== undefined && mag !== null) {
-            // Calculate luminosity from apparent magnitude
-            const distance = 10; // Placeholder distance in parsecs
-            const absoluteMagnitude = mag - 5 * (Math.log10(distance) - 1);
-            const luminosity = Math.pow(10, (4.83 - absoluteMagnitude) / 2.5);
-            luminosities.push(luminosity);
-
-            // Calculate radius using Stefan-Boltzmann law
-            const radius = calculateRadius(luminosity, temperature);
-            radii.push(radius);
-        }
+        luminosities.push(luminosity);
+        radii.push(radius);
     }
 });
     
