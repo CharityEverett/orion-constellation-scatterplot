@@ -45,110 +45,73 @@
     </a-entity>
 </a-scene>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-    const starfield = document.getElementById('starfield');
-    const scaleFactor = 0.05;
+   <script>
+    const stefanBoltzmannConstant = 5.670374419e-8;
+    const solarLuminosity = 3.828e26;
+    const solarRadius = 6.957e8;
+
+    function calculateRadius(luminosity, temperature) {
+        const luminosityWatts = luminosity * solarLuminosity;
+        const radiusMeters = Math.sqrt(luminosityWatts / (4 * Math.PI * stefanBoltzmannConstant * Math.pow(temperature, 4)));
+        return radiusMeters / solarRadius;
+    }
 
     fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
         .then(response => response.json())
         .then(data => {
-            const stars = data.features
+            const stars = data.features;
+            const plotData = stars.reduce((acc, star) => {
+                const mag = star.properties.mag;
+                const bv = star.properties.bv;
 
-                
-                .filter(star => star.properties.mag < 5)
-                .slice(0, 200);
+                if (bv !== undefined && bv !== null && mag !== undefined && mag !== null) {
+                    const temperature = 4600 * ((1 / (0.92 * bv + 1.7)) + (1 / (0.92 * bv + 0.62)));
+                    const distance = 10; // Placeholder distance in parsecs
+                    const absoluteMagnitude = mag - 5 * (Math.log10(distance) - 1);
+                    const luminosity = Math.pow(10, (4.83 - absoluteMagnitude) / 2.5);
+                    const starRadius = calculateRadius(luminosity, temperature);
 
-            stars.forEach(star => {
-                const sphere = document.createElement('a-sphere');
-                
-                // Assuming temperature, luminosity, and radius are available in star properties
-                const temperature = star.properties.temperature || 5000; // Default value if not available
-                const luminosity = star.properties.luminosity || 1; // Default value if not available
-                const radius = star.properties.radius || 1; // Default value if not available
-
-                // Map temperature to x-axis (inverted), luminosity to y-axis, and radius to z-axis
-                const x = -temperature * scaleFactor;
-                const y = Math.log10(luminosity) * scaleFactor;
-                const z = radius * scaleFactor;
-
-                sphere.setAttribute('position', `${x} ${y} ${z}`);
-                sphere.setAttribute('radius', '0.1');
-                sphere.setAttribute('color', '#FFFFFF');
-                sphere.setAttribute('material', {
-                    shader: 'flat',
-                    opacity: 0.8
-                });
-                sphere.setAttribute('class', 'clickable');
-const stefanBoltzmannConstant = 5.670374419e-8;
-const solarLuminosity = 3.828e26; // Solar luminosity in watts
-const solarRadius = 6.957e8; // Solar radius in meters
-
-function calculateRadius(luminosity, temperature) {
-    // Convert luminosity to watts (assuming input is in solar luminosities)
-    const luminosityWatts = luminosity * solarLuminosity;
-    
-    // Calculate radius in meters
-    const radiusMeters = Math.sqrt(luminosityWatts / (4 * Math.PI * stefanBoltzmannConstant * Math.pow(temperature, 4)));
-    
-    // Convert to solar radii
-    return radiusMeters / solarRadius;
-}
-
-const temperatures = [];
-const luminosities = [];
-const radii = [];
-
-stars.forEach(star => {
-    const mag = star.properties.mag;
-    const bv = star.properties.bv;
-
-    if (bv !== undefined && bv !== null && mag !== undefined && mag !== null) {
-        // Calculate temperature from B-V color index
-        const temperature = 4600 * ((1 / (0.92 * bv + 1.7)) + (1 / (0.92 * bv + 0.62)));
-
-        // Calculate luminosity from apparent magnitude
-        const distance = 10; // Placeholder distance in parsecs
-        const absoluteMagnitude = mag - 5 * (Math.log10(distance) - 1);
-        const luminosity = Math.pow(10, (4.83 - absoluteMagnitude) / 2.5);
-
-        // Calculate radius using Stefan-Boltzmann law
-        const radius = calculateRadius(luminosity, temperature);
-
-        // Push calculated values to arrays
-        temperatures.push(temperature);
-        luminosities.push(luminosity);
-        radii.push(radius);
-    }
-});
-    
-    const radius = calculateRadius(luminosity, temperature);
-const radius = calculateRadius(luminosity, temperature);
-radii.push(radius);
-});
-                // Add star name label (if available)
-                if (star.properties.name) {
-                    const text = document.createElement('a-text');
-                    text.setAttribute('value', star.properties.name);
-                    text.setAttribute('align', 'center');
-                    text.setAttribute('position', '0 0.5 0');
-                    text.setAttribute('scale', '0.5 0.5 0.5');
-                    text.setAttribute('visible', false);
-                    sphere.appendChild(text);
-
-                    sphere.addEventListener('mouseenter', () => {
-                        text.setAttribute('visible', true);
-                    });
-                    sphere.addEventListener('mouseleave', () => {
-                        text.setAttribute('visible', false);
+                    acc.push({
+                        x: temperature,
+                        y: luminosity,
+                        r: starRadius * 10 // Scale radius for visibility
                     });
                 }
+                return acc;
+            }, []);
 
-                starfield.appendChild(sphere);
+            const ctx = document.getElementById('hrDiagram').getContext('2d');
+            new Chart(ctx, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'Stars',
+                        data: plotData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            reverse: true,
+                            title: {
+                                display: true,
+                                text: 'Temperature (K)'
+                            }
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Luminosity (L☉)'
+                            }
+                        }
+                    }
+                }
             });
         })
-        .catch(error => console.error('Error:', error));
-});
-    </script>
+        .catch(error => console.error('Error fetching data:', error));
+</script>
 </body>
 </html>
