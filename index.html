@@ -79,46 +79,44 @@
                         .slice(0, 200);
 
                     stars.forEach(star => {
-    const sphere = document.createElement('a-sphere');
-    const temperature = star.properties.temperature || 5000;
-    const luminosity = star.properties.luminosity || 1;
-    const radius = star.properties.radius || 1;
-    
-    const scaleFactor = 0.05;
-    
-    // Calculate positions
-    const x = -temperature * scaleFactor;  // Inverted temperature for x-axis
-    const y = Math.log10(luminosity) * scaleFactor;  // Logarithmic scale for luminosity
-    const z = radius * scaleFactor;  // Radius for z-axis
+                        const sphere = document.createElement('a-sphere');
+                        const coords = star.geometry.coordinates;
+                        const x = coords[0];
+                        const y = coords[1];
+                        const z = coords.length > 2 ? coords[2] : 0;
+                        
+                        const scaleFactor = 0.05;
+                        
+                        sphere.setAttribute('position', 
+                            `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
+                        
+                        sphere.setAttribute('radius', '0.5');
+                        sphere.setAttribute('color', '#FFFFFF');
+                        sphere.setAttribute('material', {
+                            shader: 'flat',
+                            opacity: 0.8
+                        });
+                        sphere.setAttribute('class', 'clickable');
+                        
+                        if (star.properties.name) {
+                            const text = document.createElement('a-text');
+                            text.setAttribute('value', star.properties.name);
+                            text.setAttribute('align', 'center');
+                            text.setAttribute('position', '0 1.5 0');
+                            text.setAttribute('scale', '0.5 0.5 0.5');
+                            text.setAttribute('visible', false);
+                            sphere.appendChild(text);
 
-    sphere.setAttribute('position', `${x} ${y} ${z}`);
-    sphere.setAttribute('radius', '0.2');  // Fixed size for visibility
-    sphere.setAttribute('color', '#FFFFFF');
-    sphere.setAttribute('material', {
-        shader: 'flat',
-        opacity: 0.8
-    });
-    sphere.setAttribute('class', 'clickable');
-    
-    if (star.properties.name) {
-        const text = document.createElement('a-text');
-        text.setAttribute('value', star.properties.name);
-        text.setAttribute('align', 'center');
-        text.setAttribute('position', '0 1.5 0');
-        text.setAttribute('scale', '0.5 0.5 0.5');
-        text.setAttribute('visible', false);
-        sphere.appendChild(text);
-
-        sphere.addEventListener('mouseenter', () => {
-            text.setAttribute('visible', true);
-        });
-        sphere.addEventListener('mouseleave', () => {
-            text.setAttribute('visible', false);
-        });
-    }
-    
-    starfield.appendChild(sphere);
-});
+                            sphere.addEventListener('mouseenter', () => {
+                                text.setAttribute('visible', true);
+                            });
+                            sphere.addEventListener('mouseleave', () => {
+                                text.setAttribute('visible', false);
+                            });
+                        }
+                        
+                        starfield.appendChild(sphere);
+                    });
                 })
                 .catch(error => console.error('Error:', error));
         });
