@@ -40,51 +40,61 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const starfield = document.getElementById('starfield');
-            
-            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-                .then(response => response.json())
-                .then(data => {
-                    const stars = data.features
-                        .filter(star => star.properties.mag < 5)
-                        .slice(0, 200);
+    const starfield = document.getElementById('starfield');
+    const scaleFactor = 0.05;
 
-                    stars.forEach(star => {
-                        const sphere = document.createElement('a-sphere');
-                        const coords = star.geometry.coordinates;
-                        const x = coords[0];
-                        const y = coords[1];
-                        const z = coords.length > 2 ? coords[2] : 0;
-                        
-                        const scaleFactor = 0.05;
-                        
-                        sphere.setAttribute('position', 
-                            `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
-                        
-                        sphere.setAttribute('radius', '0.5');
-                        sphere.setAttribute('color', '#FFFFFF');
-                        sphere.setAttribute('material', {
-                            shader: 'flat',
-                            opacity: 0.8
-                        });
-                        sphere.setAttribute('class', 'clickable');
-                        
-                        if (star.properties.name) {
-                            const text = document.createElement('a-text');
-                            text.setAttribute('value', star.properties.name);
-                            text.setAttribute('align', 'center');
-                            text.setAttribute('position', '0 1.5 0');
-                            text.setAttribute('scale', '0.5 0.5 0.5');
-                            text.setAttribute('visible', false);
-                            sphere.appendChild(text);
+    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+        .then(response => response.json())
+        .then(data => {
+            const stars = data.features
+                .filter(star => star.properties.mag < 5)
+                .slice(0, 200);
 
-                            sphere.addEventListener('mouseenter', () => {
-                                text.setAttribute('visible', true);
-                            });
-                            sphere.addEventListener('mouseleave', () => {
-                                text.setAttribute('visible', false);
-                            });
-                        }
+            stars.forEach(star => {
+                const sphere = document.createElement('a-sphere');
+                
+                // Assuming temperature, luminosity, and radius are available in star properties
+                const temperature = star.properties.temperature || 5000; // Default value if not available
+                const luminosity = star.properties.luminosity || 1; // Default value if not available
+                const radius = star.properties.radius || 1; // Default value if not available
+
+                // Map temperature to x-axis (inverted), luminosity to y-axis, and radius to z-axis
+                const x = -temperature * scaleFactor;
+                const y = Math.log10(luminosity) * scaleFactor;
+                const z = radius * scaleFactor;
+
+                sphere.setAttribute('position', `${x} ${y} ${z}`);
+                sphere.setAttribute('radius', '0.1');
+                sphere.setAttribute('color', '#FFFFFF');
+                sphere.setAttribute('material', {
+                    shader: 'flat',
+                    opacity: 0.8
+                });
+                sphere.setAttribute('class', 'clickable');
+
+                // Add star name label (if available)
+                if (star.properties.name) {
+                    const text = document.createElement('a-text');
+                    text.setAttribute('value', star.properties.name);
+                    text.setAttribute('align', 'center');
+                    text.setAttribute('position', '0 0.5 0');
+                    text.setAttribute('scale', '0.5 0.5 0.5');
+                    text.setAttribute('visible', false);
+                    sphere.appendChild(text);
+
+                    sphere.addEventListener('mouseenter', () => {
+                        text.setAttribute('visible', true);
+                    });
+                    sphere.addEventListener('mouseleave', () => {
+                        text.setAttribute('visible', false);
+                    });
+                }
+
+                starfield.appendChild(sphere);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+});
                         
                         starfield.appendChild(sphere);
                     });
