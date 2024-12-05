@@ -4,14 +4,24 @@
     <title>Orion Star Cluster Hertsprung-Russell Scatterplot</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 </head>
 <body>
-
-        <!-- Canvas Plot -->
-    <canvas id="hrDiagram" width="800" height="600"></canvas>
    <a-scene renderer="precision: medium">
+
+ <!-- Reference sphere -->
+        <a-sphere position="0 0 -5" 
+                  radius="1" 
+                  color="#FFFFFF"
+                  material="shader: flat; opacity: 0.8"
+                  class="clickable">
+        </a-sphere>
+
+        <!-- Stars container -->
+        <a-entity id="starfield"></a-entity>
        
+    <!-- Skybox -->
+    <a-sky src="https://cdn.glitch.global/5cfc02c2-e08f-4e29-9383-05c3fa57335f/skybox_equirectangular.png?v=1732135394692"></a-sky>
+
     <!-- Lighting -->
     <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
@@ -45,74 +55,71 @@
         </a-camera>
     </a-entity>
 </a-scene>
-
+    
+ <!-- Camera rig -->
+    <a-entity position="0 0 15">
+        <a-camera look-controls wasd-controls>
+            <a-cursor
+                id="cursor"
+                material="color: white; shader: flat"
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                raycaster="objects: .clickable">
+            </a-cursor>
+        </a-camera>
    <script>
-    const stefanBoltzmannConstant = 5.670374419e-8;
-    const solarLuminosity = 3.828e26;
-    const solarRadius = 6.957e8;
+       document.addEventListener('DOMContentLoaded', function() {
+            const starfield = document.getElementById('starfield');
+            
+            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    const stars = data.features
+                        .filter(star => star.properties.mag < 5)
+                        .slice(0, 200);
 
-    function calculateRadius(luminosity, temperature) {
-        const luminosityWatts = luminosity * solarLuminosity;
-        const radiusMeters = Math.sqrt(luminosityWatts / (4 * Math.PI * stefanBoltzmannConstant * Math.pow(temperature, 4)));
-        return radiusMeters / solarRadius;
-    }
+                    stars.forEach(star => {
+                        const sphere = document.createElement('a-sphere');
+                        const coords = star.geometry.coordinates;
+                        const x = coords[0];
+                        const y = coords[1];
+                        const z = coords.length > 2 ? coords[2] : 0;
+                        
+                        const scaleFactor = 0.05;
+                        
+                        sphere.setAttribute('position', 
+                            `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
+                        
+                        sphere.setAttribute('radius', '0.5');
+                        sphere.setAttribute('color', '#FFFFFF');
+                        sphere.setAttribute('material', {
+                            shader: 'flat',
+                            opacity: 0.8
+                        });
+                        sphere.setAttribute('class', 'clickable');
+                        
+                        if (star.properties.name) {
+                            const text = document.createElement('a-text');
+                            text.setAttribute('value', star.properties.name);
+                            text.setAttribute('align', 'center');
+                            text.setAttribute('position', '0 1.5 0');
+                            text.setAttribute('scale', '0.5 0.5 0.5');
+                            text.setAttribute('visible', false);
+                            sphere.appendChild(text);
 
-    fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-        .then(response => response.json())
-        .then(data => {
-            const stars = data.features;
-            const plotData = stars.reduce((acc, star) => {
-                const mag = star.properties.mag;
-                const bv = star.properties.bv;
-
-                if (bv !== undefined && bv !== null && mag !== undefined && mag !== null) {
-                    const temperature = 4600 * ((1 / (0.92 * bv + 1.7)) + (1 / (0.92 * bv + 0.62)));
-                    const distance = 10; // Placeholder distance in parsecs
-                    const absoluteMagnitude = mag - 5 * (Math.log10(distance) - 1);
-                    const luminosity = Math.pow(10, (4.83 - absoluteMagnitude) / 2.5);
-                    const starRadius = calculateRadius(luminosity, temperature);
-
-                    acc.push({
-                        x: temperature,
-                        y: luminosity,
-                        r: starRadius * 10 // Scale radius for visibility
-                    });
-                }
-                return acc;
-            }, []);
-
-            const ctx = document.getElementById('hrDiagram').getContext('2d');
-            new Chart(ctx, {
-                type: 'bubble',
-                data: {
-                    datasets: [{
-                        label: 'Stars',
-                        data: plotData,
-                        backgroundColor: 'rgba(255, 255, 255, 1)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'logarithmic',
-                            reverse: true,
-                            title: {
-                                display: true,
-                                text: 'Temperature (K)'
-                            }
-                        },
-                        y: {
-                            type: 'logarithmic',
-                            title: {
-                                display: true,
-                                text: 'Luminosity (L☉)'
-                            }
+                            sphere.addEventListener('mouseenter', () => {
+                                text.setAttribute('visible', true);
+                            });
+                            sphere.addEventListener('mouseleave', () => {
+                                text.setAttribute('visible', false);
+                            });
                         }
-                    }
-                }
-            });
-        })
-        .catch(error => console.error('Error fetching data:', error));
-</script>
+                        
+                        starfield.appendChild(sphere);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+   </script>
 </body>
 </html>
