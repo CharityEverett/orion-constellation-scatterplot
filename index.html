@@ -80,7 +80,30 @@
                     opacity: 0.8
                 });
                 sphere.setAttribute('class', 'clickable');
+const stefanBoltzmannConstant = 5.670374419e-8;
+const solarLuminosity = 3.828e26; // Solar luminosity in watts
+const solarRadius = 6.957e8; // Solar radius in meters
 
+function calculateRadius(luminosity, temperature) {
+    // Convert luminosity to watts (assuming input is in solar luminosities)
+    const luminosityWatts = luminosity * solarLuminosity;
+    
+    // Calculate radius in meters
+    const radiusMeters = Math.sqrt(luminosityWatts / (4 * Math.PI * stefanBoltzmannConstant * Math.pow(temperature, 4)));
+    
+    // Convert to solar radii
+    return radiusMeters / solarRadius;
+}
+
+// In your data processing loop:
+stars.forEach(star => {
+    const temperature = /* ... calculate as before ... */;
+    const luminosity = /* ... calculate as before ... */;
+    
+    const radius = calculateRadius(luminosity, temperature);
+const radius = calculateRadius(luminosity, temperature);
+radii.push(radius);
+});
                 // Add star name label (if available)
                 if (star.properties.name) {
                     const text = document.createElement('a-text');
