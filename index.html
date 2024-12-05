@@ -13,7 +13,7 @@
         <!-- Reference sphere -->
         <a-sphere position="0 0 -5" 
                   radius="1" 
-                  color="#FF4500"
+                  color="#FFFFFF"
                   material="shader: flat; opacity: 0.8"
                   class="clickable">
         </a-sphere>
@@ -61,11 +61,29 @@
                             `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
                         
                         sphere.setAttribute('radius', '0.5');
-                        sphere.setAttribute('color', '#FF4500');
+                        sphere.setAttribute('color', '#FFFFFF');
                         sphere.setAttribute('material', {
                             shader: 'flat',
                             opacity: 0.8
                         });
+                        sphere.setAttribute('class', 'clickable');
+                        
+                        if (star.properties.name) {
+                            const text = document.createElement('a-text');
+                            text.setAttribute('value', star.properties.name);
+                            text.setAttribute('align', 'center');
+                            text.setAttribute('position', '0 1.5 0');
+                            text.setAttribute('scale', '0.5 0.5 0.5');
+                            text.setAttribute('visible', false);
+                            sphere.appendChild(text);
+
+                            sphere.addEventListener('mouseenter', () => {
+                                text.setAttribute('visible', true);
+                            });
+                            sphere.addEventListener('mouseleave', () => {
+                                text.setAttribute('visible', false);
+                            });
+                        }
                         
                         starfield.appendChild(sphere);
                     });
