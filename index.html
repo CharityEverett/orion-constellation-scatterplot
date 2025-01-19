@@ -1,125 +1,207 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Orion Star Cluster Hertsprung-Russell Scatterplot</title>
+    <title> Hertsprung-Russell Scatterplot</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
    <a-scene renderer="precision: medium">
-
- <!-- Reference sphere -->
-        <a-sphere position="0 0 -5" 
-                  radius="1" 
-                  color="#FFFFFF"
-                  material="shader: flat; opacity: 0.8"
-                  class="clickable">
-        </a-sphere>
-
-        <!-- Stars container -->
-        <a-entity id="starfield"></a-entity>
+        <a-entity id="starfield" animation="property: rotation; to: 0 360 0; dur: 100000; easing: linear; loop: true">
+        </a-entity>
        
-    <!-- Skybox -->
-    <a-sky src="https://cdn.glitch.global/5cfc02c2-e08f-4e29-9383-05c3fa57335f/skybox_equirectangular.png?v=1732135394692"></a-sky>
+        <a-sky src="https://cdn.glitch.global/5cfc02c2-e08f-4e29-9383-05c3fa57335f/skybox_equirectangular.png?v=1732135394692"></a-sky>
 
-    <!-- Lighting -->
-    <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
-    <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
+        <a-entity light="type: ambient; color: #FFF; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1" position="-1 1 0"></a-entity>
 
-    <!-- Axes -->
-    <a-entity line="start: 0 0 0; end: 10 0 0; color: red" position="-5 0 0"></a-entity>
-    <a-entity line="start: 0 0 0; end: 0 10 0; color: green" position="0 -5 0"></a-entity>
-    <a-entity line="start: 0 0 0; end: 0 0 10; color: blue" position="0 0 -5"></a-entity>
+        <a-entity animation="property: rotation; to: 0 360 0; dur: 100000; easing: linear; loop: true">
+            <a-entity line="start: -10 0 0; end: 10 0 0; color: red"></a-entity>
+            <a-entity line="start: 0 0 -5; end: 0 0 5; color: green"></a-entity>
+            <a-entity line="start: 0 -5 0; end: 0 5 0; color: blue"></a-entity>
+            
+            <a-text value="Temperature (K)" position="10 0 0" rotation="0 0 0" align="center"></a-text>
+            <a-text value="Luminosity (Solar)" position="0 0 5" rotation="0 90 0" align="center"></a-text>
+            <a-text value="Mass (Solar)" position="0 5 0" rotation="0 0 90" align="center"></a-text>
+        </a-entity>
 
-    <!-- Axis Labels -->
-    <a-text value="Temperature" position="5 0 0" rotation="0 -90 0" align="center"></a-text>
-    <a-text value="Luminosity" position="0 5 0" rotation="0 0 90" align="center"></a-text>
-    <a-text value="Radius" position="0 0 5" rotation="0 0 0" align="center"></a-text>
+        <!-- Info Panel -->
+        <a-entity id="infoPanel" 
+            position="-0.4 -0.3 -1" 
+            rotation="-30 0 0"
+            scale="0.3 0.3 0.3"
+            visible="false"
+            geometry="primitive: plane; width: 1.5; height: 1"
+            material="color: #000000; opacity: 0.8">
+            <a-text id="starInfo"
+                value=""
+                position="0.1 0.4 0.01"
+                scale="0.5 0.5 0.5"
+                anchor="left"
+                baseline="top"
+                font="roboto"
+                color="white"
+                width="2.8">
+            </a-text>
+        </a-entity>
 
-    <!-- Stars container -->
-    <a-entity id="starfield"></a-entity>
-
-    <!-- Skybox -->
-    <a-sky src="https://cdn.glitch.global/5cfc02c2-e08f-4e29-9383-05c3fa57335f/skybox_equirectangular.png?v=1732135394692"></a-sky>
-
-    <!-- Camera rig -->
-    <a-entity position="0 0 15">
-        <a-camera look-controls wasd-controls>
-            <a-cursor
-                id="cursor"
-                material="color: white; shader: flat"
-                position="0 0 -1"
-                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                raycaster="objects: .clickable">
-            </a-cursor>
-        </a-camera>
-    </a-entity>
-</a-scene>
+        <a-entity position="0 0 15">
+            <a-camera look-controls wasd-controls>
+                <a-cursor
+                    id="cursor"
+                    material="color: white; shader: flat"
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    raycaster="objects: .clickable">
+                </a-cursor>
+            </a-camera>
+        </a-entity>
+    </a-scene>
     
- <!-- Camera rig -->
-    <a-entity position="0 0 15">
-        <a-camera look-controls wasd-controls>
-            <a-cursor
-                id="cursor"
-                material="color: white; shader: flat"
-                position="0 0 -1"
-                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                raycaster="objects: .clickable">
-            </a-cursor>
-        </a-camera>
-   <script>
-       document.addEventListener('DOMContentLoaded', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
             const starfield = document.getElementById('starfield');
             
-            fetch('https://dieghernan.github.io/celestial_data/data/stars.6.geojson')
-                .then(response => response.json())
-                .then(data => {
-                    const stars = data.features
-                        .filter(star => star.properties.mag < 5)
-                        .slice(0, 200);
+            const hrStars = [
+                {
+                    name: "Betelgeuse",
+                    temperature: 3600,
+                    luminosity: 140000,
+                    mass: 20,
+                    color: "#FF4500",
+                    radius: 1.2,
+                    class: "Supergiant"
+                },
+                {
+                    name: "Rigel",
+                    temperature: 12100,
+                    luminosity: 120000,
+                    mass: 23,
+                    color: "#A5F2F3",
+                    radius: 1.0,
+                    class: "Supergiant"
+                },
+                {
+                    name: "Antares",
+                    temperature: 3500,
+                    luminosity: 100000,
+                    mass: 15,
+                    color: "#FF4500",
+                    radius: 1.1,
+                    class: "Supergiant"
+                },
+                {
+                    name: "Arcturus",
+                    temperature: 4300,
+                    luminosity: 10000,
+                    mass: 8,
+                    color: "#FFA500",
+                    radius: 0.8,
+                    class: "Giant"
+                },
+                {
+                    name: "Pole Star",
+                    temperature: 6000,
+                    luminosity: 1000,
+                    mass: 6,
+                    color: "#FFFF00",
+                    radius: 0.7,
+                    class: "Giant"
+                },
+                {
+                    name: "Sun",
+                    temperature: 5800,
+                    luminosity: 1,
+                    mass: 1,
+                    color: "#FFFF00",
+                    radius: 0.4,
+                    class: "Main Sequence"
+                },
+                {
+                    name: "Sirius B",
+                    temperature: 25000,
+                    luminosity: 0.01,
+                    mass: 1,
+                    color: "#FFFFFF",
+                    radius: 0.2,
+                    class: "White Dwarf"
+                }
+            ];
 
-                    stars.forEach(star => {
-                        const sphere = document.createElement('a-sphere');
-                        const coords = star.geometry.coordinates;
-                        const x = coords[0];
-                        const y = coords[1];
-                        const z = coords.length > 2 ? coords[2] : 0;
-                        
-                        const scaleFactor = 0.05;
-                        
-                        sphere.setAttribute('position', 
-                            `${x * scaleFactor} ${y * scaleFactor} ${-5}`);
-                        
-                        sphere.setAttribute('radius', '0.5');
-                        sphere.setAttribute('color', '#FFFFFF');
-                        sphere.setAttribute('material', {
-                            shader: 'flat',
-                            opacity: 0.8
-                        });
-                        sphere.setAttribute('class', 'clickable');
-                        
-                        if (star.properties.name) {
-                            const text = document.createElement('a-text');
-                            text.setAttribute('value', star.properties.name);
-                            text.setAttribute('align', 'center');
-                            text.setAttribute('position', '0 1.5 0');
-                            text.setAttribute('scale', '0.5 0.5 0.5');
-                            text.setAttribute('visible', false);
-                            sphere.appendChild(text);
+            // Add main sequence stars
+            for(let temp = 30000; temp >= 3000; temp -= 1000) {
+                const logLum = (4.8 * Math.log10(temp/5800));
+                hrStars.push({
+                    name: "Main Sequence",
+                    temperature: temp,
+                    luminosity: Math.pow(10, logLum),
+                    mass: Math.pow(temp/5800, 0.5),
+                    color: getStarColor(temp),
+                    radius: 0.3,
+                    class: "Main Sequence"
+                });
+            }
 
-                            sphere.addEventListener('mouseenter', () => {
-                                text.setAttribute('visible', true);
-                            });
-                            sphere.addEventListener('mouseleave', () => {
-                                text.setAttribute('visible', false);
-                            });
-                        }
-                        
-                        starfield.appendChild(sphere);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
+            // Add white dwarfs
+            for(let temp = 20000; temp >= 6000; temp -= 1500) {
+                hrStars.push({
+                    name: "White Dwarf",
+                    temperature: temp,
+                    luminosity: 0.01,
+                    mass: 0.6,
+                    color: "#FFFFFF",
+                    radius: 0.2,
+                    class: "White Dwarf"
+                });
+            }
+
+            hrStars.forEach(star => {
+                const sphere = document.createElement('a-sphere');
+                
+                // Updated position calculations to match reference diagram
+                const x = ((30000 - star.temperature) / 27000) * 20 - 10; 
+                const y = (Math.log10(star.luminosity) + 2) * 1;  
+                const z = (star.mass * 0.3) - 2;
+
+                sphere.setAttribute('position', `${x} ${y} ${z}`);
+                sphere.setAttribute('radius', star.radius);
+                sphere.setAttribute('color', star.color);
+                sphere.setAttribute('material', {
+                    shader: 'flat',
+                    opacity: 0.8
+                });
+                sphere.setAttribute('class', 'clickable');
+                
+                sphere.addEventListener('mouseenter', () => {
+                    const infoPanel = document.getElementById('infoPanel');
+                    const starInfo = document.getElementById('starInfo');
+                    infoPanel.setAttribute('visible', true);
+                    starInfo.setAttribute('value', 
+                        `Name: ${star.name}\n` +
+                        `Class: ${star.class}\n` +
+                        `Temperature: ${star.temperature}K\n` +
+                        `Luminosity: ${star.luminosity.toFixed(2)} Sol\n` +
+                        `Mass: ${star.mass.toFixed(2)} Sol`
+                    );
+                });
+
+                sphere.addEventListener('mouseleave', () => {
+                    const infoPanel = document.getElementById('infoPanel');
+                    infoPanel.setAttribute('visible', false);
+                });
+                
+                starfield.appendChild(sphere);
+            });
         });
-   </script>
+
+        function getStarColor(temperature) {
+            if (temperature > 20000) return "#0000FF";
+            if (temperature > 10000) return "#A5F2F3";
+            if (temperature > 7500) return "#FFFFFF";
+            if (temperature > 6000) return "#FFF44F";
+            if (temperature > 5000) return "#FFB84D";
+            return "#FF4500";
+        }
+    </script>
 </body>
 </html>
