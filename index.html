@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> Hertzsprung-Russell Scatterplot</title>
+    <title>Hertzsprung-Russell Scatterplot</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
@@ -42,6 +42,21 @@
                 font="roboto"
                 color="white"
                 width="2.8">
+            </a-text>
+        </a-entity>
+
+        <!-- Instructions Panel -->
+        <a-entity id="instructionsPanel" 
+            position="0 1.5 -2" 
+            rotation="0 0 0"
+            geometry="primitive: plane; width: 2; height: 0.5"
+            material="color: #000000; opacity: 0.8">
+            <a-text 
+                value="Use arrow keys to move forward/backward\nClick on stars for details"
+                position="0 0 0.01"
+                align="center"
+                color="white"
+                width="1.8">
             </a-text>
         </a-entity>
 
@@ -172,6 +187,26 @@
                 });
                 sphere.setAttribute('class', 'clickable');
                 
+                // Add click event for star details
+                sphere.addEventListener('click', function() {
+                    const infoPanel = document.getElementById('infoPanel');
+                    const starInfo = document.getElementById('starInfo');
+                    infoPanel.setAttribute('visible', true);
+                    starInfo.setAttribute('value', 
+                        `Name: ${star.name}\n` +
+                        `Class: ${star.class}\n` +
+                        `Temperature: ${star.temperature}K\n` +
+                        `Luminosity: ${star.luminosity.toFixed(2)} Sol\n` +
+                        `Mass: ${star.mass.toFixed(2)} Sol`
+                    );
+                    
+                    // Highlight selected star
+                    sphere.setAttribute('scale', {x: 1.5, y: 1.5, z: 1.5});
+                    setTimeout(() => {
+                        sphere.setAttribute('scale', {x: 1, y: 1, z: 1});
+                    }, 1000);
+                });
+                
                 sphere.addEventListener('mouseenter', () => {
                     const infoPanel = document.getElementById('infoPanel');
                     const starInfo = document.getElementById('starInfo');
@@ -191,6 +226,27 @@
                 });
                 
                 starfield.appendChild(sphere);
+            });
+            
+            // Add keyboard controls for forward/backward movement
+            document.addEventListener('keydown', function(event) {
+                const camera = document.querySelector('a-camera');
+                const position = camera.getAttribute('position');
+                const cameraDirection = camera.object3D.getWorldDirection();
+                
+                if (event.key === 'ArrowUp') {
+                    // Move forward
+                    position.x += cameraDirection.x * 0.5;
+                    position.y += cameraDirection.y * 0.5;
+                    position.z += cameraDirection.z * 0.5;
+                    camera.setAttribute('position', position);
+                } else if (event.key === 'ArrowDown') {
+                    // Move backward
+                    position.x -= cameraDirection.x * 0.5;
+                    position.y -= cameraDirection.y * 0.5;
+                    position.z -= cameraDirection.z * 0.5;
+                    camera.setAttribute('position', position);
+                }
             });
         });
 
