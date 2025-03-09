@@ -24,26 +24,26 @@
             <a-text value="Luminosity (Solar)" position="0 0 5" rotation="0 90 0" align="center"></a-text>
             <a-text value="Mass (Solar)" position="0 5 0" rotation="0 0 90" align="center"></a-text>
         </a-entity>
+<!-- Info Panel -->
+<a-entity id="infoPanel" 
+    position="-1.5 -0.8 -2" 
+    rotation="0 0 0"
+    scale="0.6 0.6 0.6"
+    visible="false"
+    geometry="primitive: plane; width: 2; height: 1.2"
+    material="color: #000000; opacity: 0.85">
+    <a-text id="starInfo"
+        value=""
+        position="0.1 0.5 0.01"
+        scale="0.8 0.8 0.8"
+        anchor="left"
+        baseline="top"
+        font="roboto"
+        color="white"
+        width="2.2">
+    </a-text>
+</a-entity>
 
-        <!-- Info Panel -->
-        <a-entity id="infoPanel" 
-            position="-0.4 -0.3 -1" 
-            rotation="-30 0 0"
-            scale="0.3 0.3 0.3"
-            visible="false"
-            geometry="primitive: plane; width: 1.5; height: 1"
-            material="color: #000000; opacity: 0.8">
-            <a-text id="starInfo"
-                value=""
-                position="0.1 0.4 0.01"
-                scale="0.5 0.5 0.5"
-                anchor="left"
-                baseline="top"
-                font="roboto"
-                color="white"
-                width="2.8">
-            </a-text>
-        </a-entity>
 
         <!-- Instructions Panel -->
         <a-entity id="instructionsPanel" 
