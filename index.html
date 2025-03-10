@@ -24,52 +24,29 @@
             <a-text value="Luminosity (Solar)" position="0 0 5" rotation="0 90 0" align="center"></a-text>
             <a-text value="Mass (Solar)" position="0 5 0" rotation="0 0 90" align="center"></a-text>
         </a-entity>
-<!-- Info Panel -->
-<a-entity id="infoPanel" 
-    position="-1.5 -0.8 -2" 
-    rotation="0 0 0"
-    scale="0.6 0.6 0.6"
-    visible="false"
-    geometry="primitive: plane; width: 2; height: 1.2"
-    material="color: #000000; opacity: 0.85">
-    <a-text id="starInfo"
-        value=""
-        position="0.1 0.5 0.01"
-        scale="0.8 0.8 0.8"
-        anchor="left"
-        baseline="top"
-        font="roboto"
-        color="white"
-        width="2.2">
-    </a-text>
-</a-entity>
 
-
-        <!-- Instructions Panel -->
-        <a-entity id="instructionsPanel" 
-            position="0 1.5 -2" 
-            rotation="0 0 0"
-            geometry="primitive: plane; width: 2; height: 0.5"
-            material="color: #000000; opacity: 0.8">
-            <a-text 
-                value="Use arrow keys to move forward/backward\nClick on stars for details"
-                position="0 0 0.01"
-                align="center"
-                color="white"
-                width="1.8">
-            </a-text>
-        </a-entity>
-
-        <a-entity position="0 0 15">
-            <a-camera look-controls wasd-controls>
-                <a-cursor
-                    id="cursor"
-                    material="color: white; shader: flat"
-                    position="0 0 -1"
-                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                    raycaster="objects: .clickable">
-                </a-cursor>
-            </a-camera>
+        <!-- Camera with attached info panel -->
+        <a-entity camera look-controls wasd-controls position="0 0 15">
+            <a-entity id="infoPanel" 
+                position="0 -0.5 -1.5" 
+                scale="0.5 0.5 0.5"
+                geometry="primitive: plane; width: 2; height: 1.2"
+                material="color: #000000; opacity: 0.85">
+                <a-text id="panelContent"
+                    value="Use arrow keys to move forward/backward\nClick on stars for details"
+                    position="0 0 0.01"
+                    align="center"
+                    color="white"
+                    width="3.5">
+                </a-text>
+            </a-entity>
+            <a-cursor
+                id="cursor"
+                material="color: white; shader: flat"
+                position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                raycaster="objects: .clickable">
+            </a-cursor>
         </a-entity>
     </a-scene>
     
@@ -189,10 +166,8 @@
                 
                 // Add click event for star details
                 sphere.addEventListener('click', function() {
-                    const infoPanel = document.getElementById('infoPanel');
-                    const starInfo = document.getElementById('starInfo');
-                    infoPanel.setAttribute('visible', true);
-                    starInfo.setAttribute('value', 
+                    const panelContent = document.getElementById('panelContent');
+                    panelContent.setAttribute('value', 
                         `Name: ${star.name}\n` +
                         `Class: ${star.class}\n` +
                         `Temperature: ${star.temperature}K\n` +
@@ -207,22 +182,16 @@
                     }, 1000);
                 });
                 
+                // Show star details on hover
                 sphere.addEventListener('mouseenter', () => {
-                    const infoPanel = document.getElementById('infoPanel');
-                    const starInfo = document.getElementById('starInfo');
-                    infoPanel.setAttribute('visible', true);
-                    starInfo.setAttribute('value', 
+                    const panelContent = document.getElementById('panelContent');
+                    panelContent.setAttribute('value', 
                         `Name: ${star.name}\n` +
                         `Class: ${star.class}\n` +
                         `Temperature: ${star.temperature}K\n` +
                         `Luminosity: ${star.luminosity.toFixed(2)} Sol\n` +
                         `Mass: ${star.mass.toFixed(2)} Sol`
                     );
-                });
-
-                sphere.addEventListener('mouseleave', () => {
-                    const infoPanel = document.getElementById('infoPanel');
-                    infoPanel.setAttribute('visible', false);
                 });
                 
                 starfield.appendChild(sphere);
@@ -246,6 +215,10 @@
                     position.y -= cameraDirection.y * 0.5;
                     position.z -= cameraDirection.z * 0.5;
                     camera.setAttribute('position', position);
+                } else if (event.key === 'Escape') {
+                    // Reset to instructions
+                    const panelContent = document.getElementById('panelContent');
+                    panelContent.setAttribute('value', 'Use arrow keys to move forward/backward\nClick on stars for details');
                 }
             });
         });
